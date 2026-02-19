@@ -57,7 +57,7 @@ fn get_command_owners_storage() -> &'static Mutex<HashMap<String, String>> {
 }
 
 fn normalize_command_id(action: &ActionDefinition) -> String {
-    let raw = action.command_id();
+    let raw = action.id.to_command_id();
     if raw.starts_with("FTS_") {
         return raw;
     }
@@ -378,7 +378,7 @@ pub fn register_local_actions(
     let mut summary = LocalRegistrationSummary::default();
 
     for action in actions {
-        let command_id = action.definition.command_id();
+        let command_id = action.definition.id.to_command_id();
         let action_id = action.definition.id.clone();
         match action.implementation {
             LocalActionImplementation::Supported(handler) => {
