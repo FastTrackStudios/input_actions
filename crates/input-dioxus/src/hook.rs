@@ -31,6 +31,12 @@ pub struct InputHandle {
     timeout_epoch: Signal<u64>,
 }
 
+impl PartialEq for InputHandle {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.processor, &other.processor)
+    }
+}
+
 impl InputHandle {
     /// Reload the processor with a new config.
     pub fn reload_config(&self, config: KeymapConfig) {
@@ -66,6 +72,11 @@ impl InputHandle {
     /// Reactive pending sequence display.
     pub fn pending_display(&self) -> Option<String> {
         (self.pending)()
+    }
+
+    /// Borrow the underlying processor for read-only introspection (keymaps, mouse, scroll).
+    pub fn processor(&self) -> std::cell::Ref<'_, InputProcessor> {
+        self.processor.borrow()
     }
 
     /// Reactive macro recording indicator.
