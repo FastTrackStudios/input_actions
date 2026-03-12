@@ -27,7 +27,7 @@ use actions_proto::{
     ActionDefinition, ActionEvent, ActionId, ActionResult, ActionsService,
     ActionsServiceDispatcher, DefinesActionsClient,
 };
-use roam::session::{ConnectionHandle, Context};
+use roam::ErasedCaller;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::{broadcast, RwLock};
@@ -66,14 +66,14 @@ impl ActionsRegistry {
     ///
     /// This queries the cell for its actions and caches them.
     /// Emits an `ActionEvent::Added` event.
-    pub async fn register_cell(&self, cell_name: &str, handle: ConnectionHandle) {
+    pub async fn register_cell(&self, cell_name: &str, handle: ErasedCaller) {
         let client = DefinesActionsClient::new(handle);
 
         // Query the cell for its actions
         let actions = match client.get_actions().await {
             Ok(actions) => actions,
             Err(e) => {
-                warn!(cell = cell_name, error = %e, "Failed to get actions from cell");
+                warn!(cell = cell_name, error = ?e, "Failed to get actions from cell");
                 return;
             }
         };
@@ -141,7 +141,7 @@ impl ActionsRegistry {
                     }
                 }
                 Err(e) => {
-                    warn!(cell = cell_name, error = %e, "Failed to refresh actions");
+                    warn!(cell = cell_name, error = ?e, "Failed to refresh actions");
                 }
             }
         }
@@ -206,8 +206,8 @@ impl ActionsRegistry {
         match client.execute_action(action_id.clone()).await {
             Ok(result) => result,
             Err(e) => {
-                warn!(action_id = %action_id, error = %e, "Action execution failed");
-                ActionResult::failure(format!("Execution failed: {}", e))
+                warn!(action_id = %action_id, error = ?e, "Action execution failed");
+                ActionResult::failure(format!("Execution failed: {:?}", e))
             }
         }
     }
@@ -255,11 +255,11 @@ pub struct ActionsServiceImpl {
 }
 
 impl ActionsService for ActionsServiceImpl {
-    async fn get_all_actions(&self, _cx: &Context) -> Vec<ActionDefinition> {
+    async fn get_all_actions(&self) -> Vec<ActionDefinition> {
         self.registry.get_all_actions().await
     }
 
-    async fn execute(&self, _cx: &Context, action_id: ActionId) -> ActionResult {
+    async fn execute(&self, action_id: ActionId) -> ActionResult {
         self.registry.execute(action_id).await
     }
 }

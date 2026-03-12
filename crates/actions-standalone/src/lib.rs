@@ -41,7 +41,6 @@ use actions_proto::{
     ActionDefinition, ActionId, ActionResult, ActionsService, ActionsServiceDispatcher,
 };
 use async_lock::RwLock;
-use roam::session::Context;
 use std::collections::HashMap;
 use std::future::Future;
 use std::pin::Pin;
@@ -226,11 +225,11 @@ pub struct StandaloneActionsServiceImpl {
 }
 
 impl ActionsService for StandaloneActionsServiceImpl {
-    async fn get_all_actions(&self, _cx: &Context) -> Vec<ActionDefinition> {
+    async fn get_all_actions(&self) -> Vec<ActionDefinition> {
         self.standalone.get_all_actions().await
     }
 
-    async fn execute(&self, _cx: &Context, action_id: ActionId) -> ActionResult {
+    async fn execute(&self, action_id: ActionId) -> ActionResult {
         self.standalone.execute(action_id).await
     }
 }
