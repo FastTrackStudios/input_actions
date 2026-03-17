@@ -35,9 +35,9 @@ facet-pretty = { version = "0.44" }
 facet-value = { version = "0.44" }
 facet-yaml = { version = "0.44" }
 
-# REAPER bindings (for actions-reaper)
-reaper-high = { git = "https://github.com/helgoboss/reaper-rs.git", branch = "master" }
-reaper-medium = { git = "https://github.com/helgoboss/reaper-rs.git", branch = "master" }
+# REAPER bindings (FTS fork with v7.63 ruler lane APIs)
+reaper-high = { git = "https://github.com/FastTrackStudios/reaper-rs.git", branch = "feat/reaper-763-ruler-lanes" }
+reaper-medium = { git = "https://github.com/FastTrackStudios/reaper-rs.git", branch = "feat/reaper-763-ruler-lanes" }
 
 # Dioxus UI framework (for input-dioxus)
 dioxus = "0.7.2"
