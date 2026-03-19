@@ -76,3 +76,78 @@ pub mod standalone {
         StaticActionId::new("fts.standalone.command_palette");
     pub const SHOW_ABOUT: StaticActionId = StaticActionId::new("fts.standalone.show_about");
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::ActionId;
+
+    #[test]
+    fn static_action_id_new() {
+        let id = StaticActionId::new("fts.session.toggle_playback");
+        assert_eq!(id.0, "fts.session.toggle_playback");
+    }
+
+    #[test]
+    fn static_action_id_as_str() {
+        let id = StaticActionId::new("fts.session.toggle_playback");
+        assert_eq!(id.as_str(), "fts.session.toggle_playback");
+    }
+
+    #[test]
+    fn static_action_id_to_id() {
+        let static_id = StaticActionId::new("fts.session.toggle_playback");
+        let action_id = static_id.to_id();
+        assert_eq!(action_id.as_str(), "fts.session.toggle_playback");
+    }
+
+    #[test]
+    fn static_action_id_to_command_id() {
+        let id = StaticActionId::new("fts.session.toggle_playback");
+        assert_eq!(id.to_command_id(), "FTS_SESSION_TOGGLE_PLAYBACK");
+    }
+
+    #[test]
+    fn static_action_id_display() {
+        let id = StaticActionId::new("fts.standalone.open_settings");
+        assert_eq!(format!("{}", id), "fts.standalone.open_settings");
+        assert_eq!(id.to_string(), "fts.standalone.open_settings");
+    }
+
+    #[test]
+    fn static_action_id_eq_action_id() {
+        let static_id = StaticActionId::new("fts.session.play");
+        let action_id = ActionId::new("fts.session.play");
+        assert_eq!(static_id, action_id);
+    }
+
+    #[test]
+    fn action_id_eq_static_action_id() {
+        let static_id = StaticActionId::new("fts.session.play");
+        let action_id = ActionId::new("fts.session.play");
+        assert_eq!(action_id, static_id);
+    }
+
+    #[test]
+    fn partial_eq_mismatch() {
+        let static_id = StaticActionId::new("fts.session.play");
+        let action_id = ActionId::new("fts.session.stop");
+        assert_ne!(static_id, action_id);
+        assert_ne!(action_id, static_id);
+    }
+
+    #[test]
+    fn from_static_to_action_id() {
+        let static_id = StaticActionId::new("fts.transport.stop");
+        let action_id: ActionId = static_id.into();
+        assert_eq!(action_id.as_str(), "fts.transport.stop");
+    }
+
+    #[test]
+    fn standalone_constants_exist() {
+        assert_eq!(standalone::OPEN_SETTINGS.as_str(), "fts.standalone.open_settings");
+        assert_eq!(standalone::TOGGLE_DARK_MODE.as_str(), "fts.standalone.toggle_dark_mode");
+        assert_eq!(standalone::COMMAND_PALETTE.as_str(), "fts.standalone.command_palette");
+        assert_eq!(standalone::SHOW_ABOUT.as_str(), "fts.standalone.show_about");
+    }
+}

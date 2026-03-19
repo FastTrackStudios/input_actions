@@ -44,6 +44,8 @@ use roam::service;
 
 pub mod ids;
 pub mod macros;
+#[cfg(test)]
+mod macro_tests;
 pub mod search;
 pub mod when;
 
@@ -396,4 +398,153 @@ pub trait ActionsService {
     ///
     /// Routes the execution to the appropriate cell/source.
     async fn execute(&self, action_id: ActionId) -> ActionResult;
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::when::ActionContext;
+
+    // ── ActionId::to_command_id ──────────────────────────────────────
+
+    #[test]
+    fn action_id_to_command_id_simple() {
+        let id = ActionId::new("fts.session.toggle_playback");
+        assert_eq!(id.to_command_id(), "FTS_SESSION_TOGGLE_PLAYBACK");
+    }
+
+    #[test]
+    fn action_id_to_command_id_dots_replaced() {
+        let id = ActionId::new("fts.transport.play");
+        assert_eq!(id.to_command_id(), "FTS_TRANSPORT_PLAY");
+    }
+
+    #[test]
+    fn action_id_to_command_id_nested_segments() {
+        let id = ActionId::new("fts.daw.mixer.solo_track");
+        assert_eq!(id.to_command_id(), "FTS_DAW_MIXER_SOLO_TRACK");
+    }
+
+    #[test]
+    fn action_id_to_command_id_already_upper() {
+        let id = ActionId::new("FTS.SESSION.PLAY");
+        assert_eq!(id.to_command_id(), "FTS_SESSION_PLAY");
+    }
+
+    #[test]
+    fn action_id_namespace_source_name() {
+        let id = ActionId::new("fts.session.log_hello");
+        assert_eq!(id.namespace(), Some("fts"));
+        assert_eq!(id.source(), Some("session"));
+        assert_eq!(id.name(), Some("log_hello"));
+    }
+
+    // ── ActionDefinition builder methods ─────────────────────────────
+
+    #[test]
+    fn action_definition_defaults() {
+        let def = ActionDefinition::new("fts.test.action", "Test", "A test action");
+        assert_eq!(def.id.as_str(), "fts.test.action");
+        assert_eq!(def.name, "Test");
+        assert_eq!(def.description, "A test action");
+        assert_eq!(def.category, ActionCategory::General);
+        assert!(def.menu_path.is_none());
+        assert!(def.shortcut_hint.is_none());
+        assert!(def.when.is_none());
+    }
+
+    #[test]
+    fn action_definition_with_category() {
+        let def = ActionDefinition::new("fts.test.action", "Test", "desc")
+            .with_category(ActionCategory::Transport);
+        assert_eq!(def.category, ActionCategory::Transport);
+    }
+
+    #[test]
+    fn action_definition_with_menu_path() {
+        let def = ActionDefinition::new("fts.test.action", "Test", "desc")
+            .with_menu_path("FTS/Session");
+        assert_eq!(def.menu_path.as_deref(), Some("FTS/Session"));
+    }
+
+    #[test]
+    fn action_definition_with_shortcut() {
+        let def = ActionDefinition::new("fts.test.action", "Test", "desc")
+            .with_shortcut("Cmd+Shift+P");
+        assert_eq!(def.shortcut_hint.as_deref(), Some("Cmd+Shift+P"));
+    }
+
+    #[test]
+    fn action_definition_with_when() {
+        let def = ActionDefinition::new("fts.test.action", "Test", "desc")
+            .with_when("tab:performance");
+        assert_eq!(def.when.as_deref(), Some("tab:performance"));
+    }
+
+    #[test]
+    fn action_definition_builder_chaining() {
+        let def = ActionDefinition::new("fts.test.action", "Test", "desc")
+            .with_category(ActionCategory::Session)
+            .with_menu_path("FTS/Session")
+            .with_shortcut("Ctrl+P")
+            .with_when("tab:performance && !popup_open");
+        assert_eq!(def.category, ActionCategory::Session);
+        assert_eq!(def.menu_path.as_deref(), Some("FTS/Session"));
+        assert_eq!(def.shortcut_hint.as_deref(), Some("Ctrl+P"));
+        assert_eq!(def.when.as_deref(), Some("tab:performance && !popup_open"));
+    }
+
+    // ── ActionDefinition::is_active ──────────────────────────────────
+
+    #[test]
+    fn is_active_without_when_clause() {
+        let def = ActionDefinition::new("fts.test.action", "Test", "desc");
+        let ctx = ActionContext::new();
+        assert!(def.is_active(&ctx));
+    }
+
+    #[test]
+    fn is_active_when_clause_matches() {
+        let def = ActionDefinition::new("fts.test.action", "Test", "desc")
+            .with_when("tab:performance");
+        let mut ctx = ActionContext::new();
+        ctx.set_tag("tab:performance");
+        assert!(def.is_active(&ctx));
+    }
+
+    #[test]
+    fn is_active_when_clause_does_not_match() {
+        let def = ActionDefinition::new("fts.test.action", "Test", "desc")
+            .with_when("tab:performance");
+        let ctx = ActionContext::new();
+        assert!(!def.is_active(&ctx));
+    }
+
+    #[test]
+    fn is_active_complex_when_clause() {
+        let def = ActionDefinition::new("fts.test.action", "Test", "desc")
+            .with_when("tab:performance && mode == normal");
+        let mut ctx = ActionContext::new();
+        ctx.set_tag("tab:performance");
+        ctx.set_var("mode", "normal");
+        assert!(def.is_active(&ctx));
+
+        ctx.set_var("mode", "insert");
+        assert!(!def.is_active(&ctx));
+    }
+
+    #[test]
+    fn is_active_malformed_when_fails_open() {
+        // Malformed when-clause should fail-open (return true)
+        let def = ActionDefinition::new("fts.test.action", "Test", "desc")
+            .with_when("&& broken &&");
+        let ctx = ActionContext::new();
+        assert!(def.is_active(&ctx));
+    }
+
+    #[test]
+    fn display_name_has_fts_prefix() {
+        let def = ActionDefinition::new("fts.test.action", "Toggle Playback", "desc");
+        assert_eq!(def.display_name(), "FTS: Toggle Playback");
+    }
 }
