@@ -1,53 +1,10 @@
 //! Declarative macros for the actions system.
 //!
-//! Preferred entry-point: [`define_actions!`].
+//! Entry-point: [`define_actions!`].
 //! It supports:
 //! - Grouped action definitions (`prefix` + `title`)
 //! - Grouped local action implementations (`implementation: supported(...)|unsupported(...)`)
 //! - Legacy all-in-one dispatch generation (`for Type`)
-
-/// Declare action ID constants and definitions without handlers.
-#[macro_export]
-macro_rules! declare_actions {
-    (
-        $(#[$mod_meta:meta])*
-        $vis:vis $mod_name:ident {
-            $(
-                $const_name:ident = $id_str:literal {
-                    name: $name:literal,
-                    description: $desc:literal,
-                    category: $category:ident
-                    $(, menu_path: $menu_path:literal )?
-                    $(, shortcut: $shortcut:literal )?
-                    $(, when: $when:literal )?
-                    $(,)?
-                }
-            )*
-        }
-    ) => {
-        $(#[$mod_meta])*
-        $vis mod $mod_name {
-            use $crate::ids::StaticActionId;
-
-            $(
-                pub const $const_name: StaticActionId = StaticActionId::new($id_str);
-            )*
-
-            pub fn definitions() -> Vec<$crate::ActionDefinition> {
-                vec![
-                    $(
-                        $crate::ActionDefinition::new($id_str, $name, $desc)
-                            .with_category($crate::ActionCategory::$category)
-                            $(.with_menu_path($menu_path))?
-                            $(.with_shortcut($shortcut))?
-                            $(.with_when($when))?
-                            ,
-                    )*
-                ]
-            }
-        }
-    };
-}
 
 /// Generate `dispatch_action()` for split library/binary pattern.
 #[macro_export]

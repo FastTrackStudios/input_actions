@@ -1,6 +1,6 @@
 //! Typed action ID constants and the [`StaticActionId`] wrapper.
 //!
-//! Each domain crate declares its own action IDs via [`declare_actions!`](crate::declare_actions).
+//! Each domain crate declares its own action IDs via [`define_actions!`](crate::define_actions).
 //! This module provides `StaticActionId` (the const-constructible wrapper) and
 //! constants for actions owned by `actions-proto` itself (e.g., standalone app actions).
 //!
@@ -33,6 +33,11 @@ impl StaticActionId {
 
     pub fn to_id(&self) -> ActionId {
         ActionId::new(self.0)
+    }
+
+    /// Convert to REAPER command ID format (e.g., "FTS_SESSION_TOGGLE_PLAYBACK").
+    pub fn to_command_id(&self) -> String {
+        self.to_id().to_command_id()
     }
 }
 
