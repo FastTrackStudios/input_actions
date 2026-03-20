@@ -245,9 +245,25 @@ impl ActionDefinition {
         }
     }
 
-    /// Get the display name with FTS prefix
+    /// Get the display name with developer prefix and domain hierarchy.
+    ///
+    /// Derives the hierarchy from `menu_path`. Examples:
+    /// - menu_path `"FTS/Sync"`, name `"Toggle Ableton Link"` → `"FTS: Sync - Toggle Ableton Link"`
+    /// - menu_path `"FTS/Sync/Link"`, name `"Puppet Mode"` → `"FTS: Sync - Link - Puppet Mode"`
+    /// - no menu_path, name `"Hello"` → `"FTS: Hello"`
     pub fn display_name(&self) -> String {
-        format!("FTS: {}", self.name)
+        if let Some(ref path) = self.menu_path {
+            // menu_path is like "FTS/Sync" or "FTS/Sync/Link"
+            // Skip the first segment ("FTS") since we add the prefix ourselves
+            let segments: Vec<&str> = path.split('/').skip(1).collect();
+            if segments.is_empty() {
+                format!("FTS: {}", self.name)
+            } else {
+                format!("FTS: {} - {}", segments.join(" - "), self.name)
+            }
+        } else {
+            format!("FTS: {}", self.name)
+        }
     }
 }
 
@@ -543,8 +559,22 @@ mod tests {
     }
 
     #[test]
-    fn display_name_has_fts_prefix() {
+    fn display_name_no_menu_path() {
         let def = ActionDefinition::new("fts.test.action", "Toggle Playback", "desc");
         assert_eq!(def.display_name(), "FTS: Toggle Playback");
+    }
+
+    #[test]
+    fn display_name_with_menu_path() {
+        let def = ActionDefinition::new("fts.sync.toggle_link", "Toggle Ableton Link", "desc")
+            .with_menu_path("FTS/Sync");
+        assert_eq!(def.display_name(), "FTS: Sync - Toggle Ableton Link");
+    }
+
+    #[test]
+    fn display_name_with_nested_menu_path() {
+        let def = ActionDefinition::new("fts.sync.puppet", "Puppet Mode", "desc")
+            .with_menu_path("FTS/Sync/Link");
+        assert_eq!(def.display_name(), "FTS: Sync - Link - Puppet Mode");
     }
 }
