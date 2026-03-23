@@ -8,7 +8,7 @@ license.workspace = true
 [dependencies]
 actions-proto.workspace = true
 actions-registry.workspace = true
-roam.workspace = true
+vox.workspace = true
 reaper-high.workspace = true
 reaper-medium.workspace = true
 tokio.workspace = true

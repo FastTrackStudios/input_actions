@@ -6,7 +6,7 @@ use actions_proto::{ActionDefinition, LocalActionImplementation, LocalActionRegi
 use actions_registry::ActionsRegistry;
 use reaper_high::{ActionKind, Reaper, RegisteredAction};
 use reaper_medium::CommandId;
-use roam::ErasedCaller;
+use vox::ErasedCaller;
 use std::collections::{HashMap, HashSet};
 use std::sync::{Arc, Mutex, OnceLock};
 use tracing::{debug, info, warn};

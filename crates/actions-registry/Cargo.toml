@@ -5,6 +5,6 @@ edition = "2021"
 
 [dependencies]
 actions-proto.workspace = true
-roam.workspace = true
+vox.workspace = true
 tokio = { workspace = true, features = ["sync"] }
 tracing.workspace = true

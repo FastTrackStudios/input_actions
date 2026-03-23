@@ -6,7 +6,7 @@ description = "Standalone actions implementation for web and desktop apps"
 
 [dependencies]
 actions-proto.workspace = true
-roam.workspace = true
+vox.workspace = true
 tracing.workspace = true
 
 # WASM-compatible async primitives (no tokio dependency)

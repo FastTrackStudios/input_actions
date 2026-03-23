@@ -27,7 +27,7 @@ use actions_proto::{
     ActionDefinition, ActionEvent, ActionId, ActionResult, ActionsService,
     ActionsServiceDispatcher, DefinesActionsClient,
 };
-use roam::ErasedCaller;
+use vox::ErasedCaller;
 use std::collections::HashMap;
 use std::sync::Arc;
 use tokio::sync::{broadcast, RwLock};
@@ -43,7 +43,7 @@ struct RegisteredCell {
 
 /// In-process registry for actions from all connected cells.
 ///
-/// This is designed to run in-process, querying cells via roam RPC
+/// This is designed to run in-process, querying cells via vox RPC
 /// and caching their action definitions.
 pub struct ActionsRegistry {
     /// Map of source_name -> registered cell data

@@ -40,7 +40,7 @@
 
 use convert_case::{Case, Casing};
 use facet::Facet;
-use roam::service;
+use vox::service;
 
 pub mod ids;
 pub mod macros;

@@ -19,7 +19,7 @@ macro_rules! impl_action_dispatch {
         impl $impl_type {
             pub async fn dispatch_action(
                 &self,
-                cx: &::roam::session::Context,
+                cx: &::vox::session::Context,
                 action_id: &$crate::ActionId,
             ) -> Option<$crate::ActionResult> {
                 use $mod_path as __action_ids;
@@ -431,7 +431,7 @@ macro_rules! define_actions {
             }
             pub async fn dispatch_action(
                 &self,
-                cx: &::roam::session::Context,
+                cx: &::vox::session::Context,
                 action_id: &$crate::ActionId,
             ) -> Option<$crate::ActionResult> {
                 match action_id.as_str() {
