@@ -23,7 +23,7 @@ input = { path = "crates/input" }
 input-dioxus = { path = "crates/input-dioxus" }
 
 # Roam RPC framework (pinned — latest main needs peeps sub-crates not yet published)
-vox = { git = "https://github.com/bearcove/vox.git", rev = "53bff48" }
+vox = { git = "https://github.com/Codys-Wright/vox.git", rev = "2a2f793b" }
 
 # Facet reflection - use crates.io 0.43.x to match vox's constraint
 facet = { version = "0.44" }
